@@ -4,13 +4,14 @@ const models = require("../models");
 const Page = models.Page;
 const User = models.User;
 const { main, addPage, editPage, wikiPage } = require("../views");
+const notfound = require("../views/notfound");
 
 // /wiki
 router.get("/", async (req, res, next) => {
   try {
     const pages = await Page.findAll();
     res.send(main(pages));
-  } catch (error) { next(error) }
+  } catch (next) { next(error) }
 });
 
 // /wiki
@@ -41,7 +42,9 @@ router.post("/:slug", async (req, res, next) => {
     });
 
     res.redirect("/wiki/" + updatedPages[0].slug);
-  } catch (error) { next(error) }
+  } catch (next) { 
+    next(error) 
+  }
 });
 
 router.get("/:slug/delete", async (req, res, next) => {
@@ -70,12 +73,14 @@ router.get("/:slug", async (req, res, next) => {
       }
     });
     if (page === null) {
-      res.sendStatus(404);
-    } else {
+       next();
+     } else {
       const author = await page.getAuthor();
       res.send(wikiPage(page, author));
     }
-  } catch (error) { next(error) }
+  } catch (next) { 
+    const error = {};
+  }
 });
 
 router.get("/:slug/edit", async (req, res, next) => {
@@ -94,5 +99,15 @@ router.get("/:slug/edit", async (req, res, next) => {
     }
   } catch (error) { next(error) }
 });
+
+router.use((err, req,res, next)=> {
+  res.status(500).send(serverError());
+})
+
+router.use((req,res)=> {
+  res.status(404).send(notfound());
+})
+
+
 
 module.exports = router;

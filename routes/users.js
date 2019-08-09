@@ -4,6 +4,8 @@ const models = require("../models");
 const Page = models.Page;
 const User = models.User;
 const { userList, userPages } = require("../views");
+const notfound = require("../views/notfound");
+
 
 // /users
 router.get("/", async (req, res, next) => {
@@ -27,5 +29,10 @@ router.get("/:userId", async (req, res, next) => {
     res.send(userPages(user, pages));
   } catch (error) { next(error) }
 });
+
+router.use((req,res)=> {
+   res.status(404).send(notfound());
+})
+
 
 module.exports = router;
