@@ -30,9 +30,6 @@ router.get("/:userId", async (req, res, next) => {
   } catch (error) { next(error) }
 });
 
-router.use((req,res)=> {
-   res.status(404).send(notfound());
-})
 
 
 module.exports = router;

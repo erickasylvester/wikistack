@@ -17,11 +17,6 @@ app.get('/', function (req, res) {
    res.redirect('/wiki/');
 });
 
-app.get('/testerror', function (req, res) {
-   const error = {};
-
-   throw new Error(error);
-});
 app.use((err, req,res, next)=> {
    res.status(500).send(serverError());
 })

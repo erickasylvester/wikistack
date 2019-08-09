@@ -3,7 +3,7 @@ const router = express.Router();
 const models = require("../models");
 const Page = models.Page;
 const User = models.User;
-const { main, addPage, editPage, wikiPage } = require("../views");
+const { main, addPage, editPage, wikiPage, searchPage } = require("../views");
 const notfound = require("../views/notfound");
 
 // /wiki
@@ -24,12 +24,19 @@ router.post("/", async (req, res, next) => {
       }
     });
 
+
+    const tags = req.body.tags.split(', ');
+    req.body.tags = tags;
+
     const page = await Page.create(req.body);
 
     await page.setAuthor(user);
 
     res.redirect("/wiki/" + page.slug);
-  } catch (error) { next(error) }
+  } catch (error) { 
+    console.log(error);
+
+    next(error) }
 });
 
 router.post("/:slug", async (req, res, next) => {
@@ -39,8 +46,10 @@ router.post("/:slug", async (req, res, next) => {
         slug: req.params.slug
       },
       returning: true
-    });
 
+
+
+    });
     res.redirect("/wiki/" + updatedPages[0].slug);
   } catch (next) { 
     next(error) 
@@ -76,7 +85,7 @@ router.get("/:slug", async (req, res, next) => {
        next();
      } else {
       const author = await page.getAuthor();
-      res.send(wikiPage(page, author));
+      res.send(wikiPage(page, author, req.params.tags));
     }
   } catch (next) { 
     const error = {};
@@ -100,12 +109,29 @@ router.get("/:slug/edit", async (req, res, next) => {
   } catch (error) { next(error) }
 });
 
+// for tags search
+router.get("/search", async (req, res, next) => {
+  try {
+    // const page = await Page.findOne({
+    //   where: {
+    //     slug: req.params.slug
+    //   }
+    // });
+
+    // if (page === null) {
+    //   res.sendStatus(404);
+    // } else {
+    //   const author = await page.getAuthor();
+    console.log("in search");
+      res.send(searchPage());
+    
+  } catch (error) { next(error) }
+});
+
+
+
 router.use((err, req,res, next)=> {
   res.status(500).send(serverError());
-})
-
-router.use((req,res)=> {
-  res.status(404).send(notfound());
 })
 
 
